@@ -57,7 +57,7 @@ def scrape_amazon(search):
         # Append the product information to the result list
         result.append({
             "endpoint": "amazon",
-            "product_name": product_name.span.string.strip(),
+            # "product_name": product_name.span.string.strip(),
             "product_price": product_price,
             "product_image": image
         })
