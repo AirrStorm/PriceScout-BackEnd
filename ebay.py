@@ -1,57 +1,62 @@
-# Import necessary libraries
-from bs4 import BeautifulSoup  # Library for parsing HTML
-import requests  # Library for making HTTP requests
-import re  # Regular expression library for string manipulation
+from bs4 import BeautifulSoup
+import requests
+import re
 
 # Function to remove HTML comments
-def remove_comments(soup): 
-    if not isinstance(soup, str):  # Check if the input is not already a string
-        soup = str(soup)  # Convert to string
-    return re.sub(r'<!.*?->', '', soup)  # Use regular expression to remove HTML comments
+def remove_comments(html_content):
+    if isinstance(html_content, str):  # Ensure it's a string
+        return re.sub(r'<!.*?-->', '', html_content)
+    return html_content
 
 # Scraping function for eBay
-def scrape_ebay(search):
-    result = []  # Initialize an empty list to store the scraped results
-    search = search.replace(" ", "+")  # Replace spaces with "+" for the search URL
-    search_URL = f"https://www.ebay.com/sch/i.html?_nkw={search}"  # Construct the search URL for eBay
-    HEADERS = ({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', 'Accept-Language': 'en-US, en;q=0.5'})  # Define headers to mimic a browser request
+def scrape_ebay(search_term, num_results):
+    results = []
+    search_term = search_term.replace(" ", "+")
+    search_url = f"https://www.ebay.com/sch/i.html?_nkw={search_term}"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US, en;q=0.5'
+    }
 
-    # Send request to eBay search page
-    request = requests.get(search_URL, headers=HEADERS).text  # Send GET request and retrieve the HTML content
-    soup = BeautifulSoup(request, "html.parser")  # Parse the HTML content using BeautifulSoup
+    # Send GET request
+    try:
+        response = requests.get(search_url, headers=headers)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+    except requests.RequestException as e:
+        print(f"Error fetching eBay data: {e}")
+        return results
 
-    # Loop through search results (indexes 2 to 6)
-    for index in range(2, 7):
+    # Parse HTML content
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # Extract product data
+    for index in range(2, num_results + 2):
         try:
-            try:
-                # Find product information using specific HTML attributes
-                product = soup.find("li", {"data-view": f"mi:1686|iid:{index}"}).prettify()  # Find the HTML element for the product
-                product = BeautifulSoup(product, "html.parser")  # Parse the product HTML content
+            product = soup.find("li", {"data-view": f"mi:1686|iid:{index}"})
+            if not product:
+                continue
 
-                # Extract product name
-                name = product.find("span", {"role": "heading"}).prettify()  # Find the HTML element for the product name
-                name = remove_comments(BeautifulSoup(name, "html.parser"))  # Remove HTML comments from the product name
-                name = BeautifulSoup(name, "html.parser")  # Parse the product name HTML content
+            # Extract product name
+            name_tag = product.find("span", {"role": "heading"})
+            product_name = name_tag.get_text(strip=True) if name_tag else "N/A"
 
-                # Extract product image URL
-                image = product.find("img")  # Find the HTML element for the product image
-                image = product.img["src"]  # Extract the "src" attribute containing the image URL
+            # Extract product image
+            img_tag = product.find("img")
+            product_image = img_tag["src"] if img_tag and "src" in img_tag.attrs else "N/A"
 
-                # Extract product price
-                price = product.find("span", {"class": "s-item__price"}).prettify()  # Find the HTML element for the product price
-                price = remove_comments(BeautifulSoup(price, "html.parser"))  # Remove HTML comments from the product price
-                price = BeautifulSoup(price, "html.parser")  # Parse the product price HTML content
+            # Extract product price
+            price_tag = product.find("span", {"class": "s-item__price"})
+            product_price = price_tag.get_text(strip=True) if price_tag else "N/A"
 
-                # Append product information to result list
-                result.append({
-                    "product_name": name.span.string.strip(),  # Extract and strip the text content of the product name
-                    "product_price": price.span.string.strip(),  # Extract and strip the text content of the product price
-                    "product_image": image  # Store the product image URL
-                })
+            # Append result
+            results.append({
+                "product_name": product_name,
+                "product_price": product_price,
+                "product_image": product_image
+            })
 
-            except:
-                pass  # Skip this iteration if extraction fails
         except Exception as err:
-            pass  # Skip this iteration if an exception occurs
+            print(f"Error processing product {index}: {err}")
+            continue
 
-    return result  # Return the list of scraped results
+    return results

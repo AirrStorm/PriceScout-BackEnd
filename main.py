@@ -7,12 +7,13 @@ from ebay import scrape_ebay
 
 # Prompt user to enter a search query
 search = input("Enter a search: ")
+amount = input("Enter the amount of products to scrape: ")
 
 # Call scraping functions for Amazon, Jumia, and eBay
 result = {
-    "amazon": scrape_amazon(search),
+    # "amazon": scrape_amazon(search),
     "jumia": scrape_jumia(search),
-    "ebay": scrape_ebay(search)
+    "ebay": scrape_ebay(search, int(amount))
 }
 
 # Print the result in a formatted JSON string
