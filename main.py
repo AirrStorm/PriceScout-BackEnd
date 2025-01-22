@@ -11,8 +11,8 @@ amount = input("Enter the amount of products to scrape: ")
 
 # Call scraping functions for Amazon, Jumia, and eBay
 result = {
-    # "amazon": scrape_amazon(search),
-    "jumia": scrape_jumia(search),
+    "amazon": scrape_amazon(search, int(amount)),
+    # "jumia": scrape_jumia(search)
     "ebay": scrape_ebay(search, int(amount))
 }
 
