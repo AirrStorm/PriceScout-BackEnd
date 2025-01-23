@@ -48,11 +48,17 @@ def scrape_ebay(search_term, num_results):
             price_tag = product.find("span", {"class": "s-item__price"})
             product_price = price_tag.get_text(strip=True) if price_tag else "N/A"
 
+
+            #Extract product link
+            link_tag=product.find("a", {"class": "s-item__link"})
+            product_link = link_tag.get("href") if link_tag else None
+
             # Append result
             results.append({
                 "product_name": product_name,
                 "product_price": product_price,
-                "product_image": product_image
+                "product_image": product_image,
+                "product_link" :product_link
             })
 
         except Exception as err:
