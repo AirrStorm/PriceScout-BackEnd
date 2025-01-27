@@ -18,6 +18,9 @@ This repository contains Python scripts for scraping product information from va
 - Similar to the Amazon scraper, it employs BeautifulSoup and requests libraries for web scraping.
 - The `scrape_jumia` function takes a search query as input and returns a list of dictionaries containing product details.
 
+### Jumia Has A Problem
+
+
 ### 3. eBay Scraper (`ebay.py`)
 
 - The `ebay.py` script is responsible for scraping product information from eBay.
