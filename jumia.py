@@ -10,6 +10,7 @@ def scrape_jumia(search):
     search = search.replace(" ", "+")
     search_URL = f"https://www.jumia.com.gh/catalog/?q={search}"
 
+
     # Set user agent and language headers for the request
     HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', 'Accept-Language': 'en-US, en;q=0.5'}
 
